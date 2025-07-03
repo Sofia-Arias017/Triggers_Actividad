@@ -81,3 +81,30 @@ BEGIN
 END $$
 DELIMITER ;
 UPDATE producto_presentacion SET precio = 0 WHERE producto_id = 1 AND presentacion_id = 1;
+
+-- 5. Generar factura automática (Trigger `AFTER INSERT`).
+
+DELIMITER $$
+CREATE TRIGGER trg_after_insert_pedido
+AFTER INSERT ON pedido
+FOR EACH ROW
+BEGIN
+    INSERT INTO factura (
+        total,
+        fecha,
+        pedido_id,
+        cliente_id
+    )
+    VALUES (
+        NEW.total,
+        NOW(),
+        NEW.id,
+        NEW.cliente_id
+    );
+END $$
+DELIMITER ;
+
+INSERT INTO pedido (fecha_recogida, total, cliente_id, metodo_pago_id)
+VALUES (NOW(), 28000, 1, 1);
+
+SELECT * FROM factura;
