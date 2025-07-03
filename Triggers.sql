@@ -122,3 +122,25 @@ END $$
 DELIMITER ;
 
 INSERT INTO pedido (fecha_recogida, total, cliente_id, metodo_pago_id) VALUES (NOW(), 15000, 1, 1);
+
+-- 7. Evitar eliminación de combos en uso (Trigger `BEFORE DELETE`).
+
+DELIMITER $$
+CREATE TRIGGER trg_before_delete_combo
+BEFORE DELETE ON combo
+FOR EACH ROW
+BEGIN
+    DECLARE combo_usado INT;
+
+    SELECT COUNT(*) INTO combo_usado
+    FROM detalle_pedido_combo
+    WHERE combo_id = OLD.id;
+
+    IF combo_usado > 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'No se puede eliminar el combo';
+    END IF;
+END $$
+DELIMITER ;
+
+DELETE FROM combo WHERE id = 1;
