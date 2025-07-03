@@ -66,3 +66,18 @@ DELIMITER ;
 UPDATE producto_presentacion SET precio = 4000 WHERE producto_id = 1 AND presentacion_id = 1;
 
 SELECT * FROM auditoria_precio;
+
+-- 4. Impedir precio cero o negativo (Trigger `BEFORE UPDATE`).
+
+DELIMITER $$
+CREATE TRIGGER trg_before_update_precio
+BEFORE UPDATE ON producto_presentacion
+FOR EACH ROW
+BEGIN
+    IF NEW.precio <= 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'El precio debe ser mayor a cero.';
+    END IF;
+END $$
+DELIMITER ;
+UPDATE producto_presentacion SET precio = 0 WHERE producto_id = 1 AND presentacion_id = 1;
