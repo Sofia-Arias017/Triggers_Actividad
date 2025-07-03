@@ -165,3 +165,25 @@ END $$
 DELIMITER ;
 
 DELETE FROM detalle_pedido WHERE id = 1;
+
+-- 9. Control de stock mínimo tras actualización (Trigger `AFTER UPDATE`).
+DELIMITER $$
+CREATE TRIGGER trg_after_update_stock
+AFTER UPDATE ON ingrediente
+FOR EACH ROW
+BEGIN
+    DECLARE stock_minimo INT DEFAULT 5;
+    IF NEW.stock < stock_minimo AND OLD.stock >= stock_minimo THEN
+        INSERT INTO alerta_stock (
+            ingrediente_id,
+            stock_actual,
+            fecha_alerta
+        )
+        VALUES (
+            NEW.id,
+            NEW.stock,
+            NOW()
+        );
+    END IF;
+END $$
+DELIMITER ;
