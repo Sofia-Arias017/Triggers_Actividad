@@ -39,3 +39,30 @@ END $$
 DELIMITER ;
 
 INSERT INTO ingredientes_extra (detalle_id, ingrediente_id, cantidad)VALUES (1, 2, 1);
+
+-- 3. Registrar auditoría de cambios de precio (Trigger `AFTER UPDATE`).
+
+DELIMITER $$
+CREATE TRIGGER trg_after_update_precio
+AFTER UPDATE ON producto_presentacion
+FOR EACH ROW
+BEGIN
+    IF OLD.precio <> NEW.precio THEN
+        INSERT INTO auditoria_precio (
+            producto_id,
+            presentacion_id,
+            precio_antiguo,
+            precio_nuevo
+        ) VALUES (
+            NEW.producto_id,
+            NEW.presentacion_id,
+            OLD.precio,
+            NEW.precio
+        );
+    END IF;
+END $$
+DELIMITER ;
+
+UPDATE producto_presentacion SET precio = 4000 WHERE producto_id = 1 AND presentacion_id = 1;
+
+SELECT * FROM auditoria_precio;
