@@ -108,3 +108,17 @@ INSERT INTO pedido (fecha_recogida, total, cliente_id, metodo_pago_id)
 VALUES (NOW(), 28000, 1, 1);
 
 SELECT * FROM factura;
+
+-- 6. Actualizar estado de pedido tras facturar (Trigger `AFTER INSERT`).
+DELIMITER $$
+CREATE TRIGGER trg_after_insert_factura
+AFTER INSERT ON factura
+FOR EACH ROW
+BEGIN
+    UPDATE pedido
+    SET estado = 'Facturado'
+    WHERE id = NEW.pedido_id;
+END $$
+DELIMITER ;
+
+INSERT INTO pedido (fecha_recogida, total, cliente_id, metodo_pago_id) VALUES (NOW(), 15000, 1, 1);
