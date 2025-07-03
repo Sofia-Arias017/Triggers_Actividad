@@ -187,3 +187,24 @@ BEGIN
     END IF;
 END $$
 DELIMITER ;
+
+-- 10. Registrar creación de nuevos clientes (Trigger `AFTER INSERT`).
+
+DELIMITER $$
+CREATE TRIGGER trg_after_insert_cliente
+AFTER INSERT ON cliente
+FOR EACH ROW
+BEGIN
+    INSERT INTO registro_clientes (
+        cliente_id,
+        nombre,
+        telefono
+    ) VALUES (
+        NEW.id,
+        NEW.nombre,
+        NEW.telefono
+    );
+END $$
+DELIMITER ;
+
+INSERT INTO cliente (nombre, telefono, direccion) VALUES ('Pepe', '3111234567', 'Calle 99 #45-67');
