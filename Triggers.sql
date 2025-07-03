@@ -144,3 +144,24 @@ END $$
 DELIMITER ;
 
 DELETE FROM combo WHERE id = 1;
+
+-- 8. Limpiar relaciones tras borrar un detalle (Trigger `BEFORE DELETE`).
+
+DELIMITER $$
+DROP TRIGGER IF EXISTS trg_after_delete_detalle;
+CREATE TRIGGER trg_after_delete_detalle
+AFTER DELETE ON detalle_pedido
+FOR EACH ROW
+BEGIN
+    DELETE FROM ingredientes_extra
+    WHERE detalle_id = OLD.id;
+
+    DELETE FROM detalle_pedido_producto
+    WHERE detalle_id = OLD.id;
+
+    DELETE FROM detalle_pedido_combo
+    WHERE detalle_id = OLD.id;
+END $$
+DELIMITER ;
+
+DELETE FROM detalle_pedido WHERE id = 1;
